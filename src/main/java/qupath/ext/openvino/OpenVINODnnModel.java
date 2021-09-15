@@ -115,16 +115,11 @@ class OpenVINODnnModel implements DnnModel<Mat>, UriResource {
 		if (bundle == null) {
 			synchronized(this) {
 				if (bundle == null) {
-					logger.info("1");
 					var bandle0 = OpenVINOBundle.loadBundle(uri);
-					logger.info("2");
 					bundle = bandle0;
 				}
-					logger.info("3");
 			}
-					logger.info("4");
 		}
-					logger.info("5");
 		return bundle;
 	}
 
@@ -132,48 +127,23 @@ class OpenVINODnnModel implements DnnModel<Mat>, UriResource {
 
 		@Override
 		public Map<String, Mat> predict(Map<String, Mat> input) {
-			// Blob input = OpenVINOTools.convertToBlob(mat);
-			// System.out.println(input)
-			logger.info("predict 2");
-			var bundle = getBundle();
-			logger.info("predict 2 - run");
-			return bundle.run(input);
-			// var function = getFunction();
-			// return function.call(input);
+			return getBundle().run(input);
 		}
 
 
 		@Override
 		public Mat predict(Mat input) {
-			logger.info("predict");
-			return null;
-
-			// var function = getFunction();
-			// return function.call(input);
+			throw new java.lang.UnsupportedOperationException("predict is not implemented");
 		}
 
 		@Override
 		public Map<String, DnnShape> getInputs() {
-			logger.info("getInputs");
-
-			return null;
-
-			// return getBundle().getInputs().stream().collect(Collectors.toMap(
-			// 		i -> i.getName(),
-			// 		i -> DnnShape.of(i.getShape())
-			// 		));
+			throw new java.lang.UnsupportedOperationException("getInputs is not implemented");
 		}
 
 		@Override
 		public Map<String, DnnShape> getOutputs(DnnShape... inputShapes) {
-			logger.info("getOutputs");
-
-			return null;
-
-			// return getBundle().getOutputs().stream().collect(Collectors.toMap(
-			// 		i -> i.getName(),
-			// 		i -> DnnShape.of(i.getShape())
-			// 		));
+			throw new java.lang.UnsupportedOperationException("getOutputs is not implemented");
 		}
 	}
 
@@ -186,10 +156,7 @@ class OpenVINODnnModel implements DnnModel<Mat>, UriResource {
 
 		@Override
 		public List<Mat> fromBlob(Mat blob) {
-			List<Mat> out = new ArrayList<>();
-			out.add(blob);
-			logger.info("fromBlob");
-			return out;
+			return List.of(blob);
 		}
 
 	}

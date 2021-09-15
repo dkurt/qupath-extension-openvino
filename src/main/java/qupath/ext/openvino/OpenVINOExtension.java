@@ -32,7 +32,7 @@ import qupath.opencv.dnn.DnnTools;
 import qupath.opencv.ops.ImageOps;
 
 /**
- * Experimental extension to connect QuPath and Intel OpenVINO.
+ * Extension to connect QuPath and Intel OpenVINO.
  *
  * @author Dmitry Kurtaev
  */
@@ -43,7 +43,6 @@ public class OpenVINOExtension implements QuPathExtension, GitHubProject {
 	@Override
 	public void installExtension(QuPathGUI qupath) {
 		logger.debug("Installing OpenVINO extension");
-		ImageOps.registerOp(OpenVINOOp.class, "op.ml.ext.openvino");
 		DnnTools.registerDnnModel(OpenVINODnnModel.class, OpenVINODnnModel.class.getSimpleName());
 	}
 

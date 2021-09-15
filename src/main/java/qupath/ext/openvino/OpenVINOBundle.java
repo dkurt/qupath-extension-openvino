@@ -53,10 +53,6 @@ class OpenVINOBundle {
 
 	private String inpName;
 	private String outName;
-	// private List<SimpleTensorInfo> inputs;
-	// private List<SimpleTensorInfo> outputs;
-
-	// private MetaGraphDef metaGraphDef;
 
 	private OpenVINOBundle(String pathModel) {
 		logger.info("Initialize OpenVINO network");
@@ -64,8 +60,7 @@ class OpenVINOBundle {
 		this.pathModel = pathModel;
 
 		// Determine default number of async streams.
-		Map<String, String> config = Map.of("CPU_THROUGHPUT_STREAMS", "1");
-		// Map<String, String> config = Map.of("CPU_THROUGHPUT_STREAMS", "CPU_THROUGHPUT_AUTO");
+		Map<String, String> config = Map.of("CPU_THROUGHPUT_STREAMS", "CPU_THROUGHPUT_AUTO");
 		ie.SetConfig(config, "CPU");
 		String nStr = ie.GetConfig("CPU", "CPU_THROUGHPUT_STREAMS").asString();
 		int nstreams = Integer.parseInt(nStr);
@@ -150,136 +145,4 @@ class OpenVINOBundle {
 			return Map.of(outName, outputMat);
 		}
 	}
-
-	// public long[] getOutputShape(String name) {
-	// 	var op = bundle.graph().operation(name);
-	// 	if (op == null)
-	// 		return null;
-	// 	int nOutputs = op.numOutputs();
-	// 	if (nOutputs > 1) {
-	// 		logger.warn("Operation {} has {} outputs!", name, nOutputs);
-	// 	} else if (nOutputs == 0)
-	// 		return new long[0];
-	// 	var shapeObject = op.output(0).shape();
-	// 	long[] shape = new long[shapeObject.numDimensions()];
-	// 	for (int i = 0; i < shape.length; i++)
-	// 		shape[i] = shapeObject.size(i);
-	// 	return shape;
-	// }
-
-	/**
-	 * Get information about the first required output (often the only one).
-	 * @return
-	 */
-	// public SimpleTensorInfo getInput() {
-	// 	return inputs == null || inputs.isEmpty() ? null : inputs.get(0);
-	// }
-
-	/**
-	 * Get information about all required inputs, or an empty list if no information is available.
-	 * @return
-	 */
-	// public List<SimpleTensorInfo> getInputs() {
-	// 	return inputs == null ? Collections.emptyList() : Collections.unmodifiableList(inputs);
-	// }
-
-	/**
-	 * Get the first provided output (often the only one).
-	 * @return
-	 */
-	// public SimpleTensorInfo getOutput() {
-	// 	return outputs == null || outputs.isEmpty() ? null : outputs.get(0);
-	// }
-
-	/**
-	 * Get information about all provided outputs, or an empty list if no information is available.
-	 * @return
-	 */
-	// public List<SimpleTensorInfo> getOutputs() {
-	// 	return outputs == null ? Collections.emptyList() : Collections.unmodifiableList(outputs);
-	// }
-
-	/**
-	 * Returns true if the model takes a single input.
-	 * @return
-	 */
-	// public boolean singleInput() {
-	// 	return inputs != null && inputs.size() == 1;
-	// }
-
-	/**
-	 * Returns true if the model provides a single output.
-	 * @return
-	 */
-	// public boolean singleOutput() {
-	// 	return outputs != null && outputs.size() == 1;
-	// }
-
-	// @Override
-	// public String toString() {
-	// 	if (singleInput() && singleOutput())
-	// 		return String.format("TensorFlow bundle: %s, (input=%s, output=%s)",
-	// 				getModelPath(), getInput(), getOutput());
-	// 	return String.format("TensorFlow bundle: %s, (inputs=%s, outputs=%s)",
-	// 			getModelPath(), getInputs(), getOutputs());
-	// 	//    	return String.format("TensorFlow bundle: %s, (input%s [%s], output=%s [%s])",
-	// 	//    			pathModel, inputName, arrayToString(inputShape), outputName, arrayToString(outputShape));
-	// }
-
-	/**
-	 * Helper class for parsing the essential info for an input/output tensor.
-	 */
-	// public static class SimpleTensorInfo {
-
-	// 	private TensorInfo info;
-	// 	private String name;
-	// 	private long[] shape;
-
-	// 	SimpleTensorInfo(String name, TensorInfo info) {
-	// 		this.info = info;
-	// 		this.name = name;
-	// 		if (info.hasTensorShape()) {
-	// 			var dims = info.getTensorShape().getDimList();
-	// 			shape = new long[dims.size()];
-	// 			for (int i = 0; i < dims.size(); i++) {
-	// 				var d = dims.get(i);
-	// 				shape[i] = d.getSize();
-	// 			}
-	// 		}
-	// 	}
-
-	// 	TensorInfo getInfo() {
-	// 		return info;
-	// 	}
-
-	// 	/**
-	// 	 * Get any name associated with the tensor.
-	// 	 * @return
-	// 	 */
-	// 	public String getName() {
-	// 		return name;
-	// 	}
-
-	// 	/**
-	// 	 * Get the tensor shape as an array of long.
-	// 	 * @return
-	// 	 */
-	// 	public long[] getShape() {
-	// 		return shape == null ? null : shape.clone();
-	// 	}
-
-	// 	@Override
-	// 	public String toString() {
-	// 		if (shape == null) {
-	// 			return name + " (no shape)";
-	// 		} else {
-	// 			return name + " (" +
-	// 					LongStream.of(shape).mapToObj(l -> Long.toString(l)).collect(Collectors.joining(", "))
-	// 					+ ")";
-	// 		}
-	// 	}
-
-	// }
-
-
 }
