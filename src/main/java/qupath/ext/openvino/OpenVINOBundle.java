@@ -54,10 +54,15 @@ class OpenVINOBundle {
 	private String inpName;
 	private String outName;
 
-	private OpenVINOBundle(String pathModel) {
-		logger.info("Initialize OpenVINO network");
+	public int tileHeight;
+	public int tileWidth;
+
+	private OpenVINOBundle(String pathModel, int tileHeight, int tileWidth) {
+		logger.info("Initialize OpenVINO network for tile {}x{}", tileHeight, tileWidth);
 
 		this.pathModel = pathModel;
+		this.tileHeight = tileHeight;
+		this.tileWidth = tileWidth;
 
 		// Determine default number of async streams.
 		Map<String, String> config = Map.of("CPU_THROUGHPUT_STREAMS", "CPU_THROUGHPUT_AUTO");
@@ -74,22 +79,22 @@ class OpenVINOBundle {
 		inpName = new ArrayList<String>(inputsInfo.keySet()).get(0);
 		InputInfo inputInfo = inputsInfo.get(inpName);
 
+		int[] inpDims = inputInfo.getTensorDesc().getDims();
+		if (inpDims[2] != tileHeight || inpDims[3] != tileWidth) {
+			inpDims[2] = tileHeight;
+			inpDims[3] = tileWidth;
+			net.reshape(Map.of(inpName, inpDims));
+		}
+
 		Map<String, Data> outputsInfo = net.getOutputsInfo();
 		outName = new ArrayList<String>(outputsInfo.keySet()).get(0);
 		Data outputInfo = outputsInfo.get(outName);
-
 		outShape = outputInfo.getDims();
 
-		// int[] inpDims = inputInfo.getTensorDesc().getDims();
-		// if (inpDims[2] != tileHeight || inpDims[3] != tileWidth) {
-		// 	inpDims[2] = tileHeight;
-		// 	inpDims[3] = tileWidth;
-		// 	Map<String, int[]> shapes = new HashMap<>();
-		// 	shapes.put(inpName, inpDims);
-		// 	net.reshape(shapes);
-		// }
 		inputInfo.setLayout(Layout.NHWC);
 		outputInfo.setLayout(Layout.NHWC);
+
+		// Initialize asynchronous requests.
 		ExecutableNetwork execNet = ie.LoadNetwork(net, "CPU");
 
 		requests = new InferRequest[nstreams];
@@ -101,13 +106,13 @@ class OpenVINOBundle {
 
     private static Map<String, OpenVINOBundle> cachedBundles = new HashMap<>();
 
-    static OpenVINOBundle loadBundle(String path) {
+    static OpenVINOBundle loadBundle(String path, int tileHeight, int tileWidth) {
     	cachedBundles.clear();
-    	return cachedBundles.computeIfAbsent(path, p -> new OpenVINOBundle(p));
+		return cachedBundles.computeIfAbsent(path, p -> new OpenVINOBundle(p, tileHeight, tileWidth));
     }
 
-    static OpenVINOBundle loadBundle(URI uri) {
-    	return loadBundle(Paths.get(uri).toAbsolutePath().toString());
+    static OpenVINOBundle loadBundle(URI uri, int tileHeight, int tileWidth) {
+    	return loadBundle(Paths.get(uri).toAbsolutePath().toString(), tileHeight, tileWidth);
     }
 
 	/**

@@ -50,7 +50,8 @@ class OpenVINODnnModel implements DnnModel<Mat>, UriResource {
 
 	private URI uri;
 
-	private transient OpenVINOBundle bundle;
+	// For every input shape there is a separate bundle.
+	private transient List<OpenVINOBundle> bundles = new ArrayList<>();
 
 	private transient BlobFunction<Mat> blobFunction;
 	private transient PredictionFunction<Mat> predictFunction;
@@ -111,23 +112,25 @@ class OpenVINODnnModel implements DnnModel<Mat>, UriResource {
 		return Collections.singletonList(uri);
 	}
 
-	private OpenVINOBundle getBundle() {
-		if (bundle == null) {
-			synchronized(this) {
-				if (bundle == null) {
-					var bandle0 = OpenVINOBundle.loadBundle(uri);
-					bundle = bandle0;
+	private OpenVINOBundle getBundle(int tileHeight, int tileWidth) {
+		synchronized(bundles) {
+			for (var b : bundles) {
+				if (b.tileWidth == tileWidth && b.tileHeight == tileHeight) {
+					return b;
 				}
 			}
+			var bundle = OpenVINOBundle.loadBundle(uri, tileHeight, tileWidth);
+			bundles.add(bundle);
+			return bundle;
 		}
-		return bundle;
 	}
 
 	class OVPredictionFunction implements PredictionFunction<Mat> {
 
 		@Override
-		public Map<String, Mat> predict(Map<String, Mat> input) {
-			return getBundle().run(input);
+		public Map<String, Mat> predict(Map<String, Mat> inputs) {
+			Mat input = (Mat)inputs.values().toArray()[0];
+			return getBundle(input.rows(), input.cols()).run(inputs);
 		}
 
 
