@@ -31,18 +31,25 @@ description = 'QuPath extension to use Intel OpenVINO'
 
 version = "0.3.0"
 
+import org.gradle.internal.os.OperatingSystem
+println 'Operating system: ' + OperatingSystem.current()
+
 dependencies {
     def openvinoVersion = "2021.4"
     def qupathVersion = "0.3.0"
 
-    def platform = project.findProperty("platform")
-    platform = "linux-x86_64"
-
-    if (platform) {
-        implementation "org.intel:openvino:${openvinoVersion}-${platform}"
+    def nativesCPP
+    if (OperatingSystem.current().isMacOsX()) {
+      nativesCPP = 'macosx-x86_64'
+    } else if (OperatingSystem.current().isLinux()) {
+      nativesCPP = 'linux-x86_64'
+    } else if (OperatingSystem.current().isWindows()) {
+      nativesCPP = 'windows-x86_64'
     } else {
-        implementation "org.intel:openvino:${openvinoVersion}"
+      logger.warn('Unknown operating system!')
     }
+
+    implementation "org.intel:openvino:${openvinoVersion}-${nativesCPP}"
 
     shadow "io.github.qupath:qupath-gui-fx:${qupathVersion}"
     shadow "org.slf4j:slf4j-api:1.7.30"
