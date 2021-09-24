@@ -3,7 +3,8 @@
 
  name: Build jar
 
- on: [workflow_dispatch]
+#  on: [workflow_dispatch]
+ on: [pull_request]
 
  jobs:
    build:
@@ -18,9 +19,14 @@
      - name: Grant execute permission for gradlew
        run: chmod +x gradlew
      - name: Build with Gradle
-       run: ./gradlew build -P toolchain=11
+       run: ./gradlew shadowjar -P toolchain=11
+     - name: Rename artifact
+       run: |
+          name=$(ls *.jar)
+          mv *.jar ${name%.*}-linux-x86_64.jar
+       working-directory: build/libs
      - uses: actions/upload-artifact@v2
        with:
          name: libs
-         path: build/libs
+         path: build/libs/*.jar
          retention-days: 1
