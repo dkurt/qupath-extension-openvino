@@ -1,5 +1,7 @@
 # QuPath OpenVINO extension
 
+[![GitHub all releases](https://img.shields.io/github/downloads/dkurt/qupath-extension-openvino/total?color=blue)](https://github.com/dkurt/qupath-extension-openvino/releases)
+
 Welcome to the Intel OpenVINO extension for [QuPath](http://qupath.github.io)!
 
 This adds support for inference optimization using [Intel OpenVINO for Java](https://github.com/openvinotoolkit/openvino_contrib/tree/master/modules/java_api) into QuPath.
