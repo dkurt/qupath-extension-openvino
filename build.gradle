@@ -34,11 +34,11 @@ version = "0.3.0"
 import org.gradle.internal.os.OperatingSystem
 println 'Operating system: ' + OperatingSystem.current()
 
+def nativesCPP;
 dependencies {
     def openvinoVersion = "2021.4"
     def qupathVersion = "0.3.0"
 
-    def nativesCPP
     if (OperatingSystem.current().isMacOsX()) {
       nativesCPP = 'macosx-x86_64'
     } else if (OperatingSystem.current().isLinux()) {
@@ -58,6 +58,10 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.2"
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
+}
+
+shadowJar {
+  classifier = "${nativesCPP}"
 }
 
 processResources {

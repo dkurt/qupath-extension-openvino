@@ -7,6 +7,8 @@ This adds support for inference optimization using [Intel OpenVINO for Java](htt
 
 ## Building
 
+You can always build this extension from source but you can also download pre-built package from [releases](https://github.com/dkurt/qupath-extension-openvino/releases) page. Choose one for your operating system.
+
 ### Extension + dependencies separately
 
 You can build the extension with
