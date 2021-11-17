@@ -220,7 +220,7 @@ algorithms = [
             'target_device': 'CPU',
             'preset': 'performance', # Preset [performance (default), accuracy] which controls the quantization mode 
                                      # (symmetric and asymmetric respectively)
-            'stat_subset_size': 1  # Size of subset to calculate activations statistics that can be used
+            'stat_subset_size': 300  # Size of subset to calculate activations statistics that can be used
                                      # for quantization parameters calculation.
         }
     }
