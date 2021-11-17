@@ -48,7 +48,9 @@ appropriate folder.
 
 ### OpenVINO IR format
 
-OpenVINO uses own format for the deep learning networks representation (IR). It is a pair of `.xml` and `.bin` files which generated from original model. For model conversion you can install `openvino-dev` Python package and use Model Optimizer by `python3 -m mo` command which is equivalent to `python3 /opt/intel/openvino_2021/deployment_tools/model_optimizer/mo.py` if you installed OpenVINO Distribution.
+OpenVINO uses own format for the deep learning networks representation (IR). It is a pair of `.xml` and `.bin` files which generated from original model. Download ready to use models from [models](./models) directory. There are FP32 and INT8 (quantized) version of the models. INT8 is faster for most of CPUs.
+
+Alternatively, you can convert model locally. For model conversion you can install `openvino-dev` Python package and use Model Optimizer by `python3 -m mo` command which is equivalent to `python3 /opt/intel/openvino_2021/deployment_tools/model_optimizer/mo.py` if you installed OpenVINO Distribution.
 
 Example conversion for [StarDist](https://github.com/qupath/qupath-extension-stardist) model (we recommend to use Python virtual environment to install required packages):
 
