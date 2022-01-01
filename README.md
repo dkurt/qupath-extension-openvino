@@ -1,6 +1,6 @@
 # QuPath OpenVINO extension
 
-[![GitHub all releases](https://img.shields.io/github/downloads/dkurt/qupath-extension-openvino/total?color=blue)](https://github.com/dkurt/qupath-extension-openvino/releases)
+[![GitHub all releases](https://img.shields.io/github/downloads/dkurt/qupath-extension-openvino/total?color=blue)](https://github.com/dkurt/qupath-extension-openvino/releases) [![Awesome OpenVINO](https://img.shields.io/badge/Awesome-OpenVINO-FC60A8?logo=awesomelists)](https://github.com/dkurt/awesome-openvino)
 
 Welcome to the Intel OpenVINO extension for [QuPath](http://qupath.github.io)!
 
