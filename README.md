@@ -6,6 +6,14 @@ Welcome to the Intel OpenVINO extension for [QuPath](http://qupath.github.io)!
 
 This adds support for inference optimization using [Intel OpenVINO for Java](https://github.com/openvinotoolkit/openvino_contrib/tree/master/modules/java_api) into QuPath.
 
+| Intel(R) Core(TM) i7-6700K | **Test image**: OS-3.ndpi<br>**Model**: he_heavy_augment<br>**Tile size**: 1024x1024 |
+|---|---|
+|  TensorFlow 2.4.1 with platform=mkl | 22:31 minutes |
+| OpenVINO 2021.4 | 15:02 minutes (x1.49) |
+| OpenVINO 2021.4 INT8 | 12:05 minutes (x1.86) |
+
+<img src="https://user-images.githubusercontent.com/25801568/159727338-6284edae-5cd2-4536-80af-a26e67efe85b.png" width="256">
+
 ## Building
 
 You can always build this extension from source but you can also download pre-built package from [releases](https://github.com/dkurt/qupath-extension-openvino/releases) page. Choose one for your operating system.
