@@ -20,9 +20,9 @@ repositories {
     url "https://maven.scijava.org/content/repositories/snapshots"
   }
 
-  maven {
-    url "https://openvino.jfrog.io/artifactory/openvino-gradle-dev-local"
-  }
+  // maven {
+  //   url "https://openvino.jfrog.io/artifactory/openvino-gradle-dev-local"
+  // }
 }
 
 ext.moduleName = 'qupath.extension.openvino'
@@ -49,7 +49,8 @@ dependencies {
       logger.warn('Unknown operating system!')
     }
 
-    implementation "org.intel:openvino:${openvinoVersion}-${nativesCPP}"
+    // implementation "org.intel:openvino:${openvinoVersion}-${nativesCPP}"
+    implementation files("/home/dkurt/openvino_contrib/modules/java_api/build/libs/openvino-2022.1-linux-x86_64.jar")
 
     shadow "io.github.qupath:qupath-gui-fx:${qupathVersion}"
     shadow "org.slf4j:slf4j-api:1.7.30"

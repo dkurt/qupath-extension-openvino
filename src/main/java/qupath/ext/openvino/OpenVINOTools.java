@@ -56,7 +56,7 @@ public class OpenVINOTools {
     private final static Logger logger = LoggerFactory.getLogger(OpenVINOTools.class);
 
 	static {
-        IECore.loadNativeLibs();
+        Core.loadNativeLibs();
 	}
 
     /**
@@ -65,10 +65,9 @@ public class OpenVINOTools {
      * @param mat OpenCV Mat which represents an image with interleaved channels order
      * @return OpenVINO Blob
      */
-    public static Blob convertToBlob(Mat mat) {
-        int[] dimsArr = {1, mat.channels(), mat.rows(), mat.cols()};
-        TensorDesc tDesc = new TensorDesc(Precision.FP32, dimsArr, Layout.NHWC);
-        return new Blob(tDesc, mat.data().address());
+    public static Tensor convertToBlob(Mat mat) {
+        int[] dimsArr = {1, mat.rows(), mat.cols(), mat.channels()};
+		return new Tensor(ElementType.f32, dimsArr, mat.data().address());
     }
 
 	/**
