@@ -46,7 +46,7 @@ class OpenVINOBundle {
 
 	private String pathModel;
 
-	private IECore ie = new IECore();
+	private Core ie = new Core();
 	private InferRequest[] requests;
 	private int[] outShape;
 	private int idx = 0;
@@ -66,40 +66,31 @@ class OpenVINOBundle {
 
 		// Determine default number of async streams.
 		Map<String, String> config = Map.of("CPU_THROUGHPUT_STREAMS", "CPU_THROUGHPUT_AUTO");
-		ie.SetConfig(config, "CPU");
-		String nStr = ie.GetConfig("CPU", "CPU_THROUGHPUT_STREAMS").asString();
-		int nstreams = Integer.parseInt(nStr);
+		ie.set_property("CPU", config);
+		int nstreams = ie.get_property("CPU", "OPTIMAL_NUMBER_OF_INFER_REQUESTS").asInt();
 		logger.info("Number of asynchronous streams: " + nstreams);
 
 		String xmlPath = Paths.get(pathModel).toString();
-		CNNNetwork net = ie.ReadNetwork(xmlPath);
+		Model net = ie.read_model(xmlPath);
 
 		// Get input and output info and perform network reshape in case of changed tile size
-		Map<String, InputInfo> inputsInfo = net.getInputsInfo();
-		inpName = new ArrayList<String>(inputsInfo.keySet()).get(0);
-		InputInfo inputInfo = inputsInfo.get(inpName);
-
-		int[] inpDims = inputInfo.getTensorDesc().getDims();
-		if (inpDims[2] != tileHeight || inpDims[3] != tileWidth) {
-			inpDims[2] = tileHeight;
-			inpDims[3] = tileWidth;
-			net.reshape(Map.of(inpName, inpDims));
+		inpName = net.input().get_any_name();
+		int[] inpDims = net.input().get_shape();
+		if (inpDims[1] != tileHeight || inpDims[2] != tileWidth) {
+			inpDims[1] = tileHeight;
+			inpDims[2] = tileWidth;
+			net.reshape(inpDims);
 		}
 
-		Map<String, Data> outputsInfo = net.getOutputsInfo();
-		outName = new ArrayList<String>(outputsInfo.keySet()).get(0);
-		Data outputInfo = outputsInfo.get(outName);
-		outShape = outputInfo.getDims();
-
-		inputInfo.setLayout(Layout.NHWC);
-		outputInfo.setLayout(Layout.NHWC);
+		outName = net.output().get_any_name();
+		outShape = net.output().get_shape();
 
 		// Initialize asynchronous requests.
-		ExecutableNetwork execNet = ie.LoadNetwork(net, "CPU");
+		CompiledModel execNet = ie.compile_model(net, "CPU");
 
 		requests = new InferRequest[nstreams];
 		for (int i = 0; i < nstreams; ++i) {
-			requests[i] = execNet.CreateInferRequest();
+			requests[i] = execNet.create_infer_request();
 		}
 	}
 
@@ -130,23 +121,22 @@ class OpenVINOBundle {
 			idx = (idx + 1) % requests.length;
 		}
 
-		// Output blob shape is NCHW. However output data layout is in NHWC (see outputInfo.setLayout).
-		int outC = outShape[1];
-		int outH = outShape[2];
-		int outW = outShape[3];
+		// Output blob shape is NHWC
+		int outH = outShape[1];
+		int outW = outShape[2];
+		int outC = outShape[3];
+
 		// We need to allocate a new output buffer for every run to avoid collisions.
 		Mat outputMat = new Mat(outH, outW, opencv_core.CV_32FC(outC));
-
-		TensorDesc tDesc = new TensorDesc(Precision.FP32, outShape, Layout.NHWC);
-		Blob output = new Blob(tDesc, outputMat.data().address());
+		Tensor output = OpenVINOTools.convertToBlob(outputMat);
 
 		// Run inference
-		Blob input = OpenVINOTools.convertToBlob(inputs.get(inpName));
+		Tensor input = OpenVINOTools.convertToBlob(inputs.get(inpName));
 		synchronized (req) {
-			req.SetBlob(outName, output);
-			req.SetBlob(inpName, input);
-			req.StartAsync();
-			req.Wait(WaitMode.RESULT_READY);
+			req.set_input_tensor(input);
+			req.set_output_tensor(output);
+			req.start_async();
+			req.wait_async();
 			return Map.of(outName, outputMat);
 		}
 	}

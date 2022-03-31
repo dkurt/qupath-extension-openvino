@@ -50,12 +50,11 @@ public class TestOpenVINOTools {
 
 			var tensor = OpenVINOTools.convertToBlob(mat);
 
-			var shape = tensor.getTensorDesc().getDims();
+			var shape = tensor.get_shape();
 
-			assertArrayEquals(shape, new int[] {n, channels, rows, cols});
-			
-			float[] data = new float[tensor.size()];
-			tensor.rmap().get(data);
+			assertArrayEquals(shape, new int[] {n, rows, cols, channels});
+
+			float[] data = tensor.data();
 
 			// Check values are correct
 			int idx = 0;

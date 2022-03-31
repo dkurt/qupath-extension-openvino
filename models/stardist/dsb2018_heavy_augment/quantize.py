@@ -27,44 +27,6 @@ parser.add_argument("--int8_dir", default="./optimized", type=str,
 args = parser.parse_args()
 
 
-angles = np.arange(0, 2 * pi, pi / 16)  # Get 32 angles
-cos_angles = np.cos(angles).reshape(-1, 1)
-sin_angles = np.sin(angles).reshape(-1, 1)
-nms_threshold = 0.5
-confidence_threshold = 0.7
-
-class Contour:
-    def __init__(self, pts):
-        self.pts = pts
-        self.xmin, self.ymin = np.amin(pts, axis=0)
-        self.xmax, self.ymax = np.amax(pts, axis=0)
-        mask = np.zeros((self.ymax - self.ymin + 1,
-                         self.xmax - self.xmin + 1), dtype=np.uint8)
-        self.mask = cv.drawContours(mask, [pts - [self.xmin, self.ymin]], -1, (1), cv.FILLED)
-
-
-def nms(coords, probs, nms_threshold, tile_size):
-    # To optimize NMS we compare contours not with each other but with a global
-    # predictions mask
-    global_mask = np.zeros((tile_size, tile_size), dtype=np.uint8)
-
-    coords = [np.clip(pts, 0, tile_size - 1) for pts in coords]
-    contours = [Contour(pts) for pts in coords]
-    ids = []
-    for i in reversed(np.argsort(probs)):
-        ctr = contours[i]
-        ref_mask = global_mask[ctr.ymin : ctr.ymax + 1, ctr.xmin : ctr.xmax + 1]
-
-        inter_area = np.count_nonzero(np.logical_and(ref_mask, ctr.mask))
-        union_area = np.count_nonzero(np.logical_or(ref_mask, ctr.mask))
-        iou = inter_area / union_area
-        if iou <= nms_threshold:
-            ids.append(i)
-            ref_mask[:, :] |= ctr.mask[:, :]
-
-    return ids
-
-
 def normalize_percentile(inp, percentiles=[1.0, 99.0]):
     num_channels = inp.shape[2]
     total = inp.shape[0] * inp.shape[1]
@@ -96,7 +58,7 @@ def normalize_percentile(inp, percentiles=[1.0, 99.0]):
 
 
 class DatasetsDataLoader(DataLoader):
- 
+
     def __init__(self, config):
         if not isinstance(config, Dict):
             config = Dict(config)
@@ -120,77 +82,12 @@ class DatasetsDataLoader(DataLoader):
     def __getitem__(self, item):
         img = imread(self.images[item])
         mask = imread(self.masks[item])
-        
+
         img = np.expand_dims(img, axis=-1)
         img = normalize_percentile(img)
         img = np.expand_dims(img.transpose(2, 0, 1), axis=0)
 
         return (item, mask), img
-
-class AccuracyMetric(Metric):
-    def __init__(self):
-        super().__init__()
-        self.name = "Dice"
-        self._values = []
-
-    @property
-    def value(self):
-        """ Returns accuracy metric value for the last model output. """
-        return {self.name: [self._values[-1]]}
-
-    @property
-    def avg_value(self):
-        """ Returns accuracy metric value for all model outputs. """
-        print("{} = {}".format(self.name, sum(self._values)/len(self._values)))
-
-    def update(self, out, annotation):
-        """ Updates prediction matches.
-        :param output: model output
-        :param target: annotations
-        Put your post-processing code here.
-        Put your custom metric code here.
-        The metric gets appended to the list of metric values
-        """
-        out = out[0]
-        annotation = annotation[0]
-
-        # Network predicts two concatenated tensors - probabilities of the nucleos
-        # and the distances among an every anchor ray.
-        probs = out[0, 0]
-        distances = out[0, 1:]
-
-        # Filter nucleor by probabilities.
-        mask = probs > confidence_threshold
-        probs = probs[mask]
-        distances = distances[:, mask]
-        centers = np.where(mask)
-
-        # Compute the coordinates of contours
-        coords = np.array([centers[1] + distances * cos_angles,
-                           centers[0] + distances * sin_angles])
-        coords = coords.reshape(2, 32, -1).transpose(2, 1, 0).astype(np.int32)
-        ids = nms(coords, probs, nms_threshold, tile_size=out.shape[-1])
-        contours = coords[ids]
-        
-        labels = np.zeros((256, 256), np.uint8)
-        labels = cv.drawContours(labels, contours, -1, (255), cv.FILLED)
-
-        inter = np.logical_and(labels != 0, annotation != 0).sum()
-        dice = 2.0 * inter / (np.sum(labels != 0) + np.sum(annotation != 0))
-
-        self._values.append(dice)
-
-    def reset(self):
-        """ Resets collected matches """
-        self._values = []
-
-    @property
-    def higher_better(self):
-        """Attribute whether the metric should be increased"""
-        return True
-
-    def get_attributes(self):
-        return {}
 
 # Dictionary with the FP32 model info
 model_config = Dict({
@@ -218,7 +115,7 @@ algorithms = [
         'name': 'DefaultQuantization', # Optimization algorithm name
         'params': {
             'target_device': 'CPU',
-            'preset': 'performance', # Preset [performance (default), accuracy] which controls the quantization mode 
+            'preset': 'performance', # Preset [performance (default), accuracy] which controls the quantization mode
                                      # (symmetric and asymmetric respectively)
             'stat_subset_size': 300  # Size of subset to calculate activations statistics that can be used
                                      # for quantization parameters calculation.
@@ -231,10 +128,10 @@ model = load_model(model_config)
 
 # Initialize the data loader and metric.
 data_loader = DatasetsDataLoader(dataset_config)
-metric = AccuracyMetric()
+# metric = AccuracyMetric()
 
 # Initialize the engine for metric calculation and statistics collection.
-engine = IEEngine(engine_config, data_loader, metric)
+engine = IEEngine(engine_config, data_loader, None)
 
 # Initialize the engine for metric calculation and statistics collection.
 pipeline = create_pipeline(algorithms, engine)
