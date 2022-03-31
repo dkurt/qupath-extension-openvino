@@ -67,7 +67,7 @@ public class OpenVINOTools {
      */
     public static Tensor convertToBlob(Mat mat) {
         int[] dimsArr = {1, mat.rows(), mat.cols(), mat.channels()};
-		return new Tensor(ElementType.f32, dimsArr, mat.data().address());
+        return new Tensor(ElementType.f32, dimsArr, mat.data().address());
     }
 
 	/**

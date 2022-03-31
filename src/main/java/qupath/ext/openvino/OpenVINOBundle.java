@@ -74,6 +74,7 @@ class OpenVINOBundle {
 		Model net = ie.read_model(xmlPath);
 
 		// Get input and output info and perform network reshape in case of changed tile size
+		inpName = net.input().get_any_name();
 		int[] inpDims = net.input().get_shape();
 		if (inpDims[1] != tileHeight || inpDims[2] != tileWidth) {
 			inpDims[1] = tileHeight;
@@ -130,7 +131,7 @@ class OpenVINOBundle {
 		Tensor output = OpenVINOTools.convertToBlob(outputMat);
 
 		// Run inference
-		Tensor input = OpenVINOTools.convertToBlob(inputs.get(inputs.keySet().toArray()[0]));
+		Tensor input = OpenVINOTools.convertToBlob(inputs.get(inpName));
 		synchronized (req) {
 			req.set_input_tensor(input);
 			req.set_output_tensor(output);

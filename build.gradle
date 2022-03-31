@@ -20,9 +20,20 @@ repositories {
     url "https://maven.scijava.org/content/repositories/snapshots"
   }
 
-  // maven {
-  //   url "https://openvino.jfrog.io/artifactory/openvino-gradle-dev-local"
-  // }
+  def github = ivy {
+    url "https://github.com/"
+
+    patternLayout {
+        artifact '/[organisation]/[module]/releases/download/[revision]/openvino-[revision]-[classifier].[ext]'
+    }
+
+    metadataSources { artifact() }
+  }
+
+  exclusiveContent {
+      forRepositories(github)
+      filter { includeGroup("dkurt") }
+  }
 }
 
 ext.moduleName = 'qupath.extension.openvino'
@@ -36,7 +47,7 @@ println 'Operating system: ' + OperatingSystem.current()
 
 def nativesCPP;
 dependencies {
-    def openvinoVersion = "2021.4"
+    def openvinoVersion = "2022.1"
     def qupathVersion = "0.3.0"
 
     if (OperatingSystem.current().isMacOsX()) {
@@ -49,8 +60,7 @@ dependencies {
       logger.warn('Unknown operating system!')
     }
 
-    // implementation "org.intel:openvino:${openvinoVersion}-${nativesCPP}"
-    implementation files("/home/dkurt/openvino_contrib/modules/java_api/build/libs/openvino-2022.1-linux-x86_64.jar")
+    implementation "dkurt:openvino_java:${openvinoVersion}:${nativesCPP}@jar"
 
     shadow "io.github.qupath:qupath-gui-fx:${qupathVersion}"
     shadow "org.slf4j:slf4j-api:1.7.30"
