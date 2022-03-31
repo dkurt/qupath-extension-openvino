@@ -74,17 +74,15 @@ class OpenVINOBundle {
 		Model net = ie.read_model(xmlPath);
 
 		// Get input and output info and perform network reshape in case of changed tile size
-		// Map<String, InputInfo> inputsInfo = net.getInputsInfo();
-		// inpName = new ArrayList<String>(inputsInfo.keySet()).get(0);
-		// InputInfo inputInfo = inputsInfo.get(inpName);
+		int[] inpDims = net.input().get_shape();
+		if (inpDims[1] != tileHeight || inpDims[2] != tileWidth) {
+			inpDims[1] = tileHeight;
+			inpDims[2] = tileWidth;
+			net.reshape(inpDims);
+		}
 
-		int[] inpDims = {1, tileHeight, tileWidth, 3};
-		net.reshape(inpDims);
-
-		// Map<String, Data> outputsInfo = net.getOutputsInfo();
-		// outName = new ArrayList<String>(outputsInfo.keySet()).get(0);
-		// Data outputInfo = outputsInfo.get(outName);
-		// outShape = outputInfo.getDims();
+		outName = net.output().get_any_name();
+		outShape = net.output().get_shape();
 
 		// Initialize asynchronous requests.
 		CompiledModel execNet = ie.compile_model(net, "CPU");
@@ -122,12 +120,13 @@ class OpenVINOBundle {
 			idx = (idx + 1) % requests.length;
 		}
 
-		// Output blob shape is NCHW. However output data layout is in NHWC (see outputInfo.setLayout).
-		// int outC = outShape[1];
-		// int outH = outShape[2];
-		// int outW = outShape[3];
+		// Output blob shape is NHWC
+		int outH = outShape[1];
+		int outW = outShape[2];
+		int outC = outShape[3];
+
 		// We need to allocate a new output buffer for every run to avoid collisions.
-		Mat outputMat = new Mat(this.tileHeight, this.tileWidth, opencv_core.CV_32FC(33));
+		Mat outputMat = new Mat(outH, outW, opencv_core.CV_32FC(outC));
 		Tensor output = OpenVINOTools.convertToBlob(outputMat);
 
 		// Run inference
@@ -137,7 +136,7 @@ class OpenVINOBundle {
 			req.set_output_tensor(output);
 			req.start_async();
 			req.wait_async();
-			return Map.of("concatenate_4/concat", outputMat);
+			return Map.of(outName, outputMat);
 		}
 	}
 }

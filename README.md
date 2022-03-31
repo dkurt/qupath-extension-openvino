@@ -11,6 +11,8 @@ This adds support for inference optimization using [Intel OpenVINO for Java](htt
 |  TensorFlow 2.4.1 with platform=mkl | 22:31 minutes |
 | OpenVINO 2021.4 | 15:02 minutes (x1.49) |
 | OpenVINO 2021.4 INT8 | 12:05 minutes (x1.86) |
+| OpenVINO 2022.1 | 15:07 minutes |
+| OpenVINO 2021.4 INT8 | 9:55 minutes |
 
 <img src="https://user-images.githubusercontent.com/25801568/159727338-6284edae-5cd2-4536-80af-a26e67efe85b.png" width="256">
 
