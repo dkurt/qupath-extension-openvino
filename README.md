@@ -71,4 +71,4 @@ pip install openvino-dev tensorflow
 mo --input input --data_type FP16 --input_shape "[1,1024,1024,3]" --saved_model_dir=he_heavy_augment
 ```
 
-Note that extension is able to reshape model to any input size in runtime so `"[1,1024,1024,3]"` is just a default input resolution.
+Note that extension is able to reshape model to any input size in runtime so `"[1,1024,1024,3]"` is just a default input resolution. For `dsb2018_heavy_augment` number of channels equals `1` so use `--input_shape "[1,1024,1024,1]"`
