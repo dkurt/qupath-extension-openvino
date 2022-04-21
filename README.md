@@ -1,6 +1,6 @@
 # QuPath OpenVINO extension
 
-[![GitHub all releases](https://img.shields.io/github/downloads/dkurt/qupath-extension-openvino/total?color=blue)](https://github.com/dkurt/qupath-extension-openvino/releases) [![Awesome OpenVINO](https://img.shields.io/badge/Awesome-OpenVINO-FC60A8?logo=awesomelists)](https://github.com/dkurt/awesome-openvino)
+[![GitHub all releases](https://img.shields.io/github/downloads/dkurt/qupath-extension-openvino/total?color=blue)](https://github.com/dkurt/qupath-extension-openvino/releases) [![Image.sc forum](https://img.shields.io/badge/ask-question-brightgreen/json.svg?&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAABPklEQVR42m3SyyqFURTA8Y2BER0TDyExZ+aSPIKUlPIITFzKeQWXwhBlQrmFgUzMMFLKZeguBu5y+//17dP3nc5vuPdee6299gohUYYaDGOyyACq4JmQVoFujOMR77hNfOAGM+hBOQqB9TjHD36xhAa04RCuuXeKOvwHVWIKL9jCK2bRiV284QgL8MwEjAneeo9VNOEaBhzALGtoRy02cIcWhE34jj5YxgW+E5Z4iTPkMYpPLCNY3hdOYEfNbKYdmNngZ1jyEzw7h7AIb3fRTQ95OAZ6yQpGYHMMtOTgouktYwxuXsHgWLLl+4x++Kx1FJrjLTagA77bTPvYgw1rRqY56e+w7GNYsqX6JfPwi7aR+Y5SA+BXtKIRfkfJAYgj14tpOF6+I46c4/cAM3UhM3JxyKsxiOIhH0IO6SH/A1Kb1WBeUjbkAAAAAElFTkSuQmCC)](https://forum.image.sc/u/dkurt) [![Awesome OpenVINO](https://img.shields.io/badge/Awesome-OpenVINO-FC60A8?logo=awesomelists)](https://github.com/dkurt/awesome-openvino)
 
 Welcome to the Intel OpenVINO extension for [QuPath](http://qupath.github.io)!
 
@@ -72,3 +72,5 @@ mo --input input --data_type FP16 --input_shape "[1,1024,1024,3]" --saved_model_
 ```
 
 Note that extension is able to reshape model to any input size in runtime so `"[1,1024,1024,3]"` is just a default input resolution. For `dsb2018_heavy_augment` number of channels equals `1` so use `--input_shape "[1,1024,1024,1]"`
+
+:thinking: For questions and feature requests use [issues](https://github.com/dkurt/qupath-extension-openvino/issues) or [forum](https://forum.image.sc/u/dkurt).
